@@ -10,6 +10,10 @@ public class RetrofitConfiguration {
 
     private static final String BASE_URL = "https://api.themoviedb.org/3/";
 
+    public static String getImageBaseUrlThumbnail() {
+        return "https://image.tmdb.org/t/p/w500";
+    }
+
     public static Retrofit getInstance() {
         if (retrofit == null) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();

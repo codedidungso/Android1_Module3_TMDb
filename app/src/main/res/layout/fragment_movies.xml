@@ -6,10 +6,9 @@
     android:background="@color/colorPrimaryDark"
     tools:context=".fragments.MoviesFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_movies"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Movies" />
+        android:layout_height="match_parent"/>
 
 </FrameLayout>

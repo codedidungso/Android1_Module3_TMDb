@@ -76,7 +76,7 @@ public class GetMoviesResponse {
         private String original_language;
         private String original_title;
         private String title;
-        private int vote_average;
+        private double vote_average;
         private String overview;
         private String release_date;
         private List<Integer> genre_ids;
@@ -161,7 +161,7 @@ public class GetMoviesResponse {
             this.title = title;
         }
 
-        public int getVote_average() {
+        public double getVote_average() {
             return vote_average;
         }
 
