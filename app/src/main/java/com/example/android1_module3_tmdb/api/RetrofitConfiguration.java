@@ -14,6 +14,10 @@ public class RetrofitConfiguration {
         return "https://image.tmdb.org/t/p/w500";
     }
 
+    public static String getImageBaseUrlOriginal() {
+        return "https://image.tmdb.org/t/p/original";
+    }
+
     public static Retrofit getInstance() {
         if (retrofit == null) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();

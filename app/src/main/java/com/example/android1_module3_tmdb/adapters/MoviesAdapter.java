@@ -70,7 +70,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesView
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    context.startActivity(new Intent(context, MovieDetailActivity.class));
+                    Intent intent = new Intent(context, MovieDetailActivity.class);
+                    intent.putExtra("movie_id", movie.getId());
+                    context.startActivity(intent);
                 }
             });
         }

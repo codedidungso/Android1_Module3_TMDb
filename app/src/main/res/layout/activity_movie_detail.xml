@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".activities.MovieDetailActivity">
 
@@ -35,10 +36,62 @@
             android:src="@drawable/ic_favorite_border_black_24dp"/>
     </RelativeLayout>
 
+    <LinearLayout
+        android:id="@+id/ll_watch_trailer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginBottom="100dp"
+        android:orientation="vertical">
+        
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_play_circle_filled_black_24dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_medium"
+            android:text="Watch Trailer"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#515151"
+            android:paddingHorizontal="@dimen/space_medium"
+            android:paddingVertical="4dp"
+            android:background="@drawable/custom_round_white_button"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="100dp"
+        android:padding="@dimen/space_default"
+        android:layout_gravity="bottom">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:text="Title"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:text="Genres 1, genres 2,..."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_genres"/>
+
+    </LinearLayout>
+
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/ns_detail"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         app:behavior_peekHeight="100dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimary"/>
+        android:background="@drawable/custom_round_primary_background"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
