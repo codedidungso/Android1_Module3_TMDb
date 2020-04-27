@@ -7,6 +7,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +19,9 @@ import com.example.android1_module3_tmdb.R;
 import com.example.android1_module3_tmdb.api.APIService;
 import com.example.android1_module3_tmdb.api.RetrofitConfiguration;
 import com.example.android1_module3_tmdb.models.GetMovieDetailResponse;
+
+import java.text.NumberFormat;
+import java.util.Currency;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,16 +35,30 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     @BindView(R.id.iv_background)
     ImageView ivBackground;
-    @BindView(R.id.iv_back)
-    ImageView ivBack;
-    @BindView(R.id.iv_favourite)
-    ImageView ivFavourite;
-    @BindView(R.id.ns_detail)
-    NestedScrollView nsDetail;
     @BindView(R.id.tv_title)
     TextView tvTitle;
     @BindView(R.id.tv_genres)
     TextView tvGenres;
+    @BindView(R.id.tv_rating_score)
+    TextView tvRatingScore;
+    @BindView(R.id.rb_rating_star)
+    RatingBar rbRatingStar;
+    @BindView(R.id.tv_vote_count)
+    TextView tvVoteCount;
+    @BindView(R.id.tv_run_time)
+    TextView tvRunTime;
+    @BindView(R.id.tv_release_date)
+    TextView tvReleaseDate;
+    @BindView(R.id.tv_overview)
+    TextView tvOverview;
+    @BindView(R.id.tv_revenue)
+    TextView tvRevenue;
+    @BindView(R.id.tv_prod_companies)
+    TextView tvProdCompanies;
+    @BindView(R.id.tv_prod_countries)
+    TextView tvProdCountries;
+    @BindView(R.id.ns_detail)
+    NestedScrollView nsDetail;
 
     private GetMovieDetailResponse movie;
 
@@ -89,6 +107,36 @@ public class MovieDetailActivity extends AppCompatActivity {
             }
         }
         tvGenres.setText(genres);
+
+        tvRatingScore.setText(String.valueOf(movie.getVote_average()));
+        rbRatingStar.setProgress((int) movie.getVote_average());
+        tvVoteCount.setText(String.valueOf(movie.getVote_count()));
+        tvRunTime.setText(movie.getRuntime() + "m");
+
+        tvReleaseDate.setText(movie.getRelease_date());
+        tvOverview.setText(movie.getOverview());
+
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance();
+        numberFormat.setCurrency(Currency.getInstance("USD"));
+        tvRevenue.setText(numberFormat.format(movie.getRevenue()));
+
+        StringBuilder prodCompanies = new StringBuilder();
+        for (int i = 0; i < movie.getProduction_companies().size(); i++) {
+            prodCompanies.append(movie.getProduction_companies().get(i).getName());
+            if (i != movie.getProduction_companies().size() - 1) {
+                prodCompanies.append(", ");
+            }
+        }
+        tvProdCompanies.setText(prodCompanies);
+
+        StringBuilder prodCountries = new StringBuilder();
+        for (int i = 0; i < movie.getProduction_countries().size(); i++) {
+            prodCountries.append(movie.getProduction_countries().get(i).getName());
+            if (i != movie.getProduction_countries().size() - 1) {
+                prodCountries.append(", ");
+            }
+        }
+        tvProdCountries.setText(prodCountries);
     }
 
     private void setupUI() {
