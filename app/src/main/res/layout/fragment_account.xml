@@ -59,6 +59,32 @@
             android:background="@drawable/custom_accent_button"
             android:text="Sign in" />
     </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/ll_account"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/space_default">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome to TMDb"/>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/tv_sign_out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign out"
+            android:background="@drawable/custom_accent_button"
+            android:paddingVertical="@dimen/space_medium"
+            android:paddingHorizontal="@dimen/space_default"/>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ll_loading"

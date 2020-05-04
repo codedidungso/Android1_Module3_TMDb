@@ -14,16 +14,16 @@ import androidx.fragment.app.Fragment;
 import com.example.android1_module3_tmdb.R;
 import com.example.android1_module3_tmdb.api.APIService;
 import com.example.android1_module3_tmdb.api.RetrofitConfiguration;
+import com.example.android1_module3_tmdb.models.DeleteSessionIdRequest;
+import com.example.android1_module3_tmdb.models.DeleteSessionIdResponse;
 import com.example.android1_module3_tmdb.models.GetCreateRequestTokenResponse;
 import com.example.android1_module3_tmdb.models.PostCreateSessionRequest;
 import com.example.android1_module3_tmdb.models.PostCreateSessionResponse;
 import com.example.android1_module3_tmdb.models.PostCreateSessionWithLoginRequest;
 import com.example.android1_module3_tmdb.models.PostCreateSessionWithLoginResponse;
+import com.example.android1_module3_tmdb.utils.Utils;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,6 +47,8 @@ public class AccountFragment extends Fragment {
     LinearLayout llSignIn;
     @BindView(R.id.ll_loading)
     LinearLayout llLoading;
+    @BindView(R.id.ll_account)
+    LinearLayout llAccount;
 
     private APIService service;
 
@@ -61,14 +63,57 @@ public class AccountFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_account, container, false);
         ButterKnife.bind(this, view);
 
+       if (Utils.getSessionId(getContext()) == null) {
+           llAccount.setVisibility(View.INVISIBLE);
+           llSignIn.setVisibility(View.VISIBLE);
+       } else {
+           llAccount.setVisibility(View.VISIBLE);
+           llSignIn.setVisibility(View.INVISIBLE);
+       }
+
         service = RetrofitConfiguration.getInstance().create(APIService.class);
 
         return view;
     }
 
-    @OnClick(R.id.tv_sign_in)
-    public void onViewClicked() {
-        createRequestToken();
+    @OnClick({R.id.tv_sign_in, R.id.tv_sign_out})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.tv_sign_in:
+                createRequestToken();
+                break;
+            case R.id.tv_sign_out:
+                signOut();
+                break;
+        }
+    }
+
+    private void signOut() {
+        llLoading.setVisibility(View.VISIBLE);
+        DeleteSessionIdRequest body = new DeleteSessionIdRequest();
+        body.setSession_id(Utils.getSessionId(getContext()));
+        Call<DeleteSessionIdResponse> call = service.deleteSessionId(body);
+        call.enqueue(new Callback<DeleteSessionIdResponse>() {
+            @Override
+            public void onResponse(Call<DeleteSessionIdResponse> call, Response<DeleteSessionIdResponse> response) {
+                llLoading.setVisibility(View.INVISIBLE);
+                if (response.code() == 200) {
+                    llAccount.setVisibility(View.INVISIBLE);
+                    llSignIn.setVisibility(View.VISIBLE);
+
+                    Utils.saveSessionId(null, getContext());
+                } else {
+                    llLoading.setVisibility(View.INVISIBLE);
+                    Utils.showErrorFromServer(response, getContext());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DeleteSessionIdResponse> call, Throwable t) {
+                llLoading.setVisibility(View.INVISIBLE);
+                Toast.makeText(getContext(), t.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void createRequestToken() {
@@ -81,12 +126,7 @@ public class AccountFragment extends Fragment {
                     createSessionWithLogin(response.body().getRequest_token());
                 } else {
                     llLoading.setVisibility(View.INVISIBLE);
-                    try {
-                        JSONObject jsonObject = new JSONObject(response.errorBody().string());
-                        Toast.makeText(getContext(), jsonObject.getString("status_message"), Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                    }
+                    Utils.showErrorFromServer(response, getContext());
                 }
             }
 
@@ -112,12 +152,7 @@ public class AccountFragment extends Fragment {
                     createSession(response.body().getRequest_token());
                 } else {
                     llLoading.setVisibility(View.INVISIBLE);
-                    try {
-                        JSONObject jsonObject = new JSONObject(response.errorBody().string());
-                        Toast.makeText(getContext(), jsonObject.getString("status_message"), Toast.LENGTH_SHORT).show();
-                    } catch (Exception e) {
-                        Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                    }
+                    Utils.showErrorFromServer(response, getContext());
                 }
             }
 
@@ -140,8 +175,12 @@ public class AccountFragment extends Fragment {
                 if (response.code() == 200) {
                     llLoading.setVisibility(View.INVISIBLE);
                     llSignIn.setVisibility(View.INVISIBLE);
-                } else {
+                    llAccount.setVisibility(View.VISIBLE);
 
+                    Utils.saveSessionId(response.body().getSession_id(), getContext());
+                } else {
+                    llLoading.setVisibility(View.INVISIBLE);
+                    Utils.showErrorFromServer(response, getContext());
                 }
             }
 

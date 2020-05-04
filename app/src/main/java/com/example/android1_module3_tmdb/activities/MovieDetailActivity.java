@@ -7,6 +7,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,7 +19,11 @@ import com.bumptech.glide.Glide;
 import com.example.android1_module3_tmdb.R;
 import com.example.android1_module3_tmdb.api.APIService;
 import com.example.android1_module3_tmdb.api.RetrofitConfiguration;
+import com.example.android1_module3_tmdb.models.GetMovieAccountStatesResponse;
 import com.example.android1_module3_tmdb.models.GetMovieDetailResponse;
+import com.example.android1_module3_tmdb.models.SetFavouriteMovieRequest;
+import com.example.android1_module3_tmdb.models.SetFavouriteMovieResponse;
+import com.example.android1_module3_tmdb.utils.Utils;
 
 import java.text.NumberFormat;
 import java.util.Currency;
@@ -59,8 +64,14 @@ public class MovieDetailActivity extends AppCompatActivity {
     TextView tvProdCountries;
     @BindView(R.id.ns_detail)
     NestedScrollView nsDetail;
+    @BindView(R.id.ll_loading)
+    LinearLayout llLoading;
+    @BindView(R.id.iv_favourite)
+    ImageView ivFavourite;
 
     private GetMovieDetailResponse movie;
+    private APIService apiService;
+    private boolean isFavourite = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,20 +79,59 @@ public class MovieDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_detail);
         ButterKnife.bind(this);
 
+        apiService = RetrofitConfiguration.getInstance().create(APIService.class);
+
+        if (Utils.getSessionId(this) == null) {
+            ivFavourite.setVisibility(View.INVISIBLE);
+        } else {
+            ivFavourite.setVisibility(View.VISIBLE);
+        }
+
         setupUI();
         loadData();
+    }
+
+    private void getMovieAccountStates() {
+        llLoading.setVisibility(View.VISIBLE);
+        Call<GetMovieAccountStatesResponse> call = apiService.getMovieAccountStates(
+                movie.getId(),
+                Utils.getSessionId(this)
+        );
+        call.enqueue(new Callback<GetMovieAccountStatesResponse>() {
+            @Override
+            public void onResponse(Call<GetMovieAccountStatesResponse> call, Response<GetMovieAccountStatesResponse> response) {
+                llLoading.setVisibility(View.INVISIBLE);
+                if (response.code() == 200) {
+                    isFavourite = response.body().isFavorite();
+                    updateImageView();
+                } else {
+                    Utils.showErrorFromServer(response, MovieDetailActivity.this);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetMovieAccountStatesResponse> call, Throwable t) {
+                llLoading.setVisibility(View.INVISIBLE);
+                Toast.makeText(MovieDetailActivity.this, t.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void loadData() {
         int id = getIntent().getIntExtra("movie_id", -1);
 
-        APIService apiService = RetrofitConfiguration.getInstance().create(APIService.class);
         Call<GetMovieDetailResponse> call = apiService.getMovieDetail(id);
         call.enqueue(new Callback<GetMovieDetailResponse>() {
             @Override
             public void onResponse(Call<GetMovieDetailResponse> call, Response<GetMovieDetailResponse> response) {
-                movie = response.body();
-                setupUIWithData();
+                if (response.code() == 200) {
+                    movie = response.body();
+                    setupUIWithData();
+                    if (Utils.getSessionId(MovieDetailActivity.this) != null) getMovieAccountStates();
+                } else {
+                    Utils.showErrorFromServer(response, MovieDetailActivity.this);
+                    onBackPressed();
+                }
             }
 
             @Override
@@ -158,10 +208,43 @@ public class MovieDetailActivity extends AppCompatActivity {
                 onBackPressed();
                 break;
             case R.id.iv_favourite:
+                updateFavouriteMovie();
                 break;
             case R.id.ll_watch_trailer:
                 watchTrailer();
                 break;
+        }
+    }
+
+    private void updateFavouriteMovie() {
+        llLoading.setVisibility(View.VISIBLE);
+        SetFavouriteMovieRequest body = new SetFavouriteMovieRequest(movie.getId(), !isFavourite);
+        Call<SetFavouriteMovieResponse> call = apiService.setFavouriteMovie(body, Utils.getSessionId(this));
+        call.enqueue(new Callback<SetFavouriteMovieResponse>() {
+            @Override
+            public void onResponse(Call<SetFavouriteMovieResponse> call, Response<SetFavouriteMovieResponse> response) {
+                llLoading.setVisibility(View.INVISIBLE);
+                if (response.code() == 201 || response.code() == 200) {
+                    isFavourite = !isFavourite;
+                    updateImageView();
+                } else {
+                    Utils.showErrorFromServer(response, MovieDetailActivity.this);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SetFavouriteMovieResponse> call, Throwable t) {
+                llLoading.setVisibility(View.INVISIBLE);
+                Toast.makeText(MovieDetailActivity.this, t.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateImageView() {
+        if (isFavourite) {
+            ivFavourite.setImageResource(R.drawable.ic_favorite_black_24dp);
+        } else {
+            ivFavourite.setImageResource(R.drawable.ic_favorite_border_black_24dp);
         }
     }
 
